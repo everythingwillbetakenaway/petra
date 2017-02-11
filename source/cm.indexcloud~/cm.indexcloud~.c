@@ -94,6 +94,7 @@ typedef struct _cmindexcloud {
 	short bang_trigger; // trigger received from bang method
 	cm_grainmem *grainmem; // struct array for grain playback information
 	long grainmem_size;
+	t_bool debug;
 } t_cmindexcloud;
 
 
@@ -482,6 +483,11 @@ void cmindexcloud_perform64(t_cmindexcloud *x, t_object *dsp64, double **ins, lo
 
 	// DSP LOOP
 	while (n--) {
+		
+		if (x->debug) {
+			object_error((t_object *)x, "set method processing during dsp loop");
+		}
+		
 		tr_curr = *tr_sigin++; // get current trigger value
 
 		if (x->attr_zero) {
@@ -888,6 +894,7 @@ t_max_err cmindexcloud_notify(t_cmindexcloud *x, t_symbol *s, t_symbol *msg, voi
 /************************************************************************************************************************/
 void cmindexcloud_doset(t_cmindexcloud *x, t_symbol *s, long ac, t_atom *av) {
 	if (ac == 1) {
+		x->debug = true;
 		x->buffer_modified = 1;
 		x->buffer_name = atom_getsym(av); // write buffer name into object structure
 		buffer_ref_set(x->buffer, x->buffer_name);
@@ -898,6 +905,7 @@ void cmindexcloud_doset(t_cmindexcloud *x, t_symbol *s, long ac, t_atom *av) {
 	else {
 		object_error((t_object *)x, "argument required (sample buffer name)");
 	}
+	x->debug = false;
 }
 
 
